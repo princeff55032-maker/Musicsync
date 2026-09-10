@@ -1,4 +1,4 @@
-import { readFileSync, readdirSync } from "fs";
+import { existsSync, mkdirSync, readFileSync, readdirSync } from "fs";
 import { resolve } from "path";
 
 // ── Flag & Config ──────────────────────────────────────────────
@@ -13,14 +13,16 @@ const AUDIO_EXTENSIONS = new Set([".mp3", ".wav", ".flac", ".ogg", ".m4a"]);
 export const AUDIO_FILENAMES: string[] = IS_DEMO_MODE
   ? (() => {
       try {
+        if (!existsSync(AUDIO_DIR)) {
+          mkdirSync(AUDIO_DIR, { recursive: true });
+        }
         return readdirSync(AUDIO_DIR).filter((f) => {
           const ext = f.slice(f.lastIndexOf(".")).toLowerCase();
           return AUDIO_EXTENSIONS.has(ext);
         });
-      } catch {
-        console.error(`DEMO mode: failed to read audio directory: ${AUDIO_DIR}`);
-        console.error(`Create the directory or set DEMO_AUDIO_DIR to an existing path.`);
-        process.exit(1);
+      } catch (error) {
+        console.warn(`DEMO mode: notice while reading audio directory: ${AUDIO_DIR}`, error);
+        return [];
       }
     })()
   : [];
