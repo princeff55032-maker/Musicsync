@@ -6,13 +6,7 @@ import type { HandlerFunction } from "@/websocket/types";
 export const handlePlay: HandlerFunction<ExtractWSRequestFrom["PLAY"]> = ({ ws, message, server }) => {
   const { room } = requireCanMutate(ws);
 
-  if (IS_DEMO_MODE) {
-    // Skip audio loading coordination — audio is pre-cached on clients.
-    // Broadcast play immediately to avoid 3s timeout dead air on stage.
-    room.executeImmediatePlay(message, server);
-  } else {
-    // Initiate audio loading for all clients
-    // The play will be executed after all clients load or timeout
-    room.initiateAudioSourceLoad(message, ws.data.clientId, server);
-  }
+  // Initiate audio loading for all clients so all devices are buffered before play
+  room.initiateAudioSourceLoad(message, ws.data.clientId, server);
 };
+

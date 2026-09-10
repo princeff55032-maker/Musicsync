@@ -1,5 +1,6 @@
 import { cn, extractFileNameFromUrl, formatTime } from "@/lib/utils";
 import { AudioSourceState, useGlobalStore } from "@/store/global";
+import { audioContextManager } from "@/utils/audioContext";
 import { sendWSRequest } from "@/utils/ws";
 import { ClientActionEnum } from "@beatsync/shared";
 import { useSortable } from "@dnd-kit/sortable";
@@ -31,6 +32,7 @@ export const QueueSortableItem = ({
   const changeAudioSource = useGlobalStore((state) => state.changeAudioSource);
   const broadcastPlay = useGlobalStore((state) => state.broadcastPlay);
   const broadcastPause = useGlobalStore((state) => state.broadcastPause);
+  const loadAudioSource = useGlobalStore((state) => state.loadAudioSource);
   const isPlaying = useGlobalStore((state) => state.isPlaying);
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
 
@@ -44,16 +46,16 @@ export const QueueSortableItem = ({
   const isLoading = sourceState.status === "loading";
   const isError = sourceState.status === "error";
 
-  const handleItemClick = (sourceState: AudioSourceState) => {
+  const handleItemClick = async (sourceState: AudioSourceState) => {
     if (!canMutate) return;
 
-    // Don't allow interaction with loading or error tracks
-    if (sourceState.status === "loading") {
-      // Could show a toast here if desired
-      return;
+    try {
+      await audioContextManager.resume();
+    } catch {
+      // Audio context resume handled by user interaction
     }
+
     if (sourceState.status === "error") {
-      // Could show error details in a toast
       return;
     }
 
@@ -66,6 +68,9 @@ export const QueueSortableItem = ({
       }
     } else {
       changeAudioSource(source.url);
+      if (sourceState.status !== "loaded") {
+        loadAudioSource(source.url);
+      }
       broadcastPlay(0);
     }
   };

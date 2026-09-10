@@ -95,7 +95,7 @@ interface PendingPlayState {
  * Each room has its own instance of RoomManager.
  */
 export class RoomManager {
-  private static readonly AUDIO_LOAD_TIMEOUT_MS = 3000; // 3 seconds max wait for audio loading
+  private static readonly AUDIO_LOAD_TIMEOUT_MS = 10000; // 10 seconds max wait for audio loading
   // Liveness policy. NTP recency can't be used for liveness: backgrounded tabs have
   // throttled timers (no NTP) but still run message handlers, so they can answer PINGs.
   static readonly LIVENESS_PING_AFTER_MS = 15_000; // silent this long -> send PING
@@ -188,7 +188,7 @@ export class RoomManager {
 
     // Store pending play state
     this.pendingPlay = {
-      clientsLoaded: new Set([initiatorClientId]),
+      clientsLoaded: new Set<string>(),
       timeout,
       playAction,
       initiatorClientId,
@@ -234,13 +234,14 @@ export class RoomManager {
       this.serverRef = server;
       this.demoAudioReadyClients.add(clientId);
       this.debouncedAudioReady();
-      return;
     }
 
     if (!this.pendingPlay) {
-      console.warn(
-        `Room ${this.roomId}: Client ${clientId} reported audio source loaded, but no pending play state found`
-      );
+      // If client loaded a source while playback is already active in the room, sync them
+      const ws = this.wsConnections.get(clientId);
+      if (ws && this.playbackState.type === "playing") {
+        this.syncClient(ws);
+      }
       return;
     }
 

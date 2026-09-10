@@ -231,6 +231,7 @@ interface GlobalState extends GlobalStateValues {
   processLowPassConfig: (config: LowPassConfigType) => void;
 
   // Audio source methods
+  loadAudioSource: (url: string) => Promise<void>;
   handleLoadAudioSource: (sources: LoadAudioSourceType) => void;
   broadcastReorder: (urls: AudioSourceType[]) => void;
 }
@@ -513,6 +514,14 @@ export const useGlobalStore = create<GlobalState>((set, get) => {
           source: { url },
         },
       });
+
+      // If this track is currently selected and playback is active, sync immediately
+      if (get().selectedAudioUrl === url && get().isPlaying) {
+        sendWSRequest({
+          ws: socket,
+          request: { type: ClientActionEnum.enum.SYNC },
+        });
+      }
     } catch (error) {
       console.error(`Failed to load audio source ${url}:`, error);
       // Update the source with error status
@@ -726,8 +735,9 @@ export const useGlobalStore = create<GlobalState>((set, get) => {
         const audioSourceState = state.audioSources[audioIndex];
         if (audioSourceState.status === "loaded" && audioSourceState.buffer) {
           newDuration = audioSourceState.buffer.duration;
+        } else if (audioSourceState.status === "idle") {
+          loadAudioSource(url);
         }
-        // If not loaded, duration will be 0 (will be updated when loaded)
       }
 
       // Reset timing state and update selected ID
@@ -867,14 +877,18 @@ export const useGlobalStore = create<GlobalState>((set, get) => {
         return;
       }
 
-      // Check if track exists but is still loading
-      if (audioSourceState?.status === "loading") {
+      // Check if track exists but is not ready (loading or idle or no buffer)
+      if (!audioSourceState || audioSourceState.status !== "loaded" || !audioSourceState.buffer) {
         if (state.isPlaying) {
           state.pauseAudio({ when: 0 });
         }
 
-        console.warn(`Cannot play audio: Track still loading: ${data.audioSource}`);
-        toast.warning(`"${extractFileNameFromUrl(data.audioSource)}" not loaded yet...`, { id: "schedulePlay" });
+        console.warn(`Cannot play audio: Track not ready (${audioSourceState?.status}): ${data.audioSource}`);
+        toast.warning(`"${extractFileNameFromUrl(data.audioSource)}" buffering...`, { id: "schedulePlay" });
+
+        if (audioSourceState?.status !== "loading") {
+          loadAudioSource(data.audioSource);
+        }
 
         const { socket } = getSocket(state);
         setTimeout(() => {
@@ -882,7 +896,7 @@ export const useGlobalStore = create<GlobalState>((set, get) => {
             ws: socket,
             request: { type: ClientActionEnum.enum.SYNC },
           });
-        }, 1000);
+        }, 1500);
 
         return;
       }
@@ -1154,7 +1168,8 @@ export const useGlobalStore = create<GlobalState>((set, get) => {
         return;
       }
       if (audioSourceState.status === "idle") {
-        console.error("Track is in idle state");
+        console.warn("Track is in idle state, initiating load");
+        loadAudioSource(audioSourceState.source.url);
         return;
       }
 
@@ -1664,6 +1679,7 @@ export const useGlobalStore = create<GlobalState>((set, get) => {
     },
 
     // Audio source methods
+    loadAudioSource,
     handleLoadAudioSource: ({ audioSourceToPlay }: LoadAudioSourceType) => {
       set({ selectedAudioUrl: audioSourceToPlay.url });
       loadAudioSource(audioSourceToPlay.url);
