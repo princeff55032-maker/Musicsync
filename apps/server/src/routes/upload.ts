@@ -18,13 +18,6 @@ export const handleGetPresignedURL = async (req: Request) => {
       return errorResponse("Method not allowed", 405);
     }
 
-    // Validate R2 configuration first
-    const r2Validation = validateR2Config();
-    if (!r2Validation.isValid) {
-      console.error("R2 configuration errors:", r2Validation.errors);
-      return errorResponse("R2 configuration not complete", 500);
-    }
-
     const body: unknown = await req.json();
     const parseResult = GetUploadUrlSchema.safeParse(body);
 
@@ -42,6 +35,24 @@ export const handleGetPresignedURL = async (req: Request) => {
 
     // Generate unique filename
     const uniqueFileName = generateAudioFileName(fileName);
+
+    // Validate R2 configuration; fall back to local direct server upload if R2 is not configured
+    const r2Validation = validateR2Config();
+    if (!r2Validation.isValid) {
+      const origin = new URL(req.url).origin;
+      const uploadUrl = `${origin}/upload/direct?file=${encodeURIComponent(uniqueFileName)}`;
+      const publicUrl = `${origin}/audio/${encodeURIComponent(uniqueFileName)}`;
+
+      console.log(`R2 not configured — using local direct upload: ${uniqueFileName}`);
+
+      const response: UploadUrlResponseType = {
+        uploadUrl,
+        publicUrl,
+      };
+
+      return jsonResponse(response);
+    }
+
     const r2Key = createKey(roomId, uniqueFileName);
 
     // Generate presigned URL for upload

@@ -1,4 +1,4 @@
-import { ADMIN_SECRET, IS_DEMO_MODE } from "@/demo";
+import { ADMIN_SECRET, AUDIO_FILE_CACHE, IS_DEMO_MODE } from "@/demo";
 import { BackupManager } from "@/managers/BackupManager";
 import { getActiveRooms } from "@/routes/active";
 import { handleGetDefaultAudio } from "@/routes/default";
@@ -29,9 +29,20 @@ const server = Bun.serve<WSData>({
     let response: Response;
 
     try {
-      // Demo mode: serve local audio files
-      if (IS_DEMO_MODE && url.pathname.startsWith("/audio/")) {
+      // Serve audio files from cache
+      if (url.pathname.startsWith("/audio/")) {
         response = handleServeAudio(url.pathname);
+      } else if (req.method === "PUT" && url.pathname === "/upload/direct") {
+        const filename = url.searchParams.get("file");
+        if (!filename) {
+          response = errorResponse("Missing file parameter", 400);
+        } else {
+          const arrayBuffer = await req.arrayBuffer();
+          const bytes = Buffer.from(arrayBuffer);
+          const type = req.headers.get("content-type") || "audio/mpeg";
+          AUDIO_FILE_CACHE.set(decodeURIComponent(filename), { bytes, type });
+          response = new Response(null, { status: 200, headers: corsHeaders });
+        }
       } else {
         switch (url.pathname) {
           case "/":
@@ -42,19 +53,11 @@ const server = Bun.serve<WSData>({
             return handleWebSocketUpgrade(req, server);
 
           case "/upload/get-presigned-url":
-            if (IS_DEMO_MODE) {
-              response = errorResponse("Uploads disabled in demo mode", 403);
-            } else {
-              response = await handleGetPresignedURL(req);
-            }
+            response = await handleGetPresignedURL(req);
             break;
 
           case "/upload/complete":
-            if (IS_DEMO_MODE) {
-              response = errorResponse("Uploads disabled in demo mode", 403);
-            } else {
-              response = await handleUploadComplete(req, server);
-            }
+            response = await handleUploadComplete(req, server);
             break;
 
           case "/stats":
