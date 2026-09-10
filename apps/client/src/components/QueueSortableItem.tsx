@@ -1,6 +1,6 @@
 import { cn, extractFileNameFromUrl, formatTime } from "@/lib/utils";
 import { AudioSourceState, useGlobalStore } from "@/store/global";
-import { audioContextManager } from "@/utils/audioContext";
+import { audioContextManager } from "@/lib/audioContextManager";
 import { sendWSRequest } from "@/utils/ws";
 import { ClientActionEnum } from "@beatsync/shared";
 import { useSortable } from "@dnd-kit/sortable";
