@@ -345,13 +345,13 @@ export class RoomManager {
       // Don't overwrite creator's username — it was set by the server
       if (!ws.data.isCreator) clientData.username = cachedClient.username;
       clientData.location = cachedClient.location;
-      if (!IS_DEMO_MODE) clientData.isAdmin = cachedClient.isAdmin;
+      clientData.isAdmin = cachedClient.isAdmin;
       clientData.joinedAt = cachedClient.joinedAt;
       clientData.nudgeMs = cachedClient.nudgeMs;
     }
 
-    // In demo mode, only the admin secret grants admin. Otherwise, first client gets admin.
-    if (!IS_DEMO_MODE && this.wsConnections.size === 0) {
+    // First client in the room always gets admin.
+    if (this.wsConnections.size === 0) {
       clientData.isAdmin = true;
     }
 
@@ -389,21 +389,18 @@ export class RoomManager {
       positionClientsInCircle(activeClients);
 
       // Check if any admins remain after removing this client
-      // In demo mode, skip auto-promotion — only the admin secret grants admin
-      if (!IS_DEMO_MODE) {
-        const remainingAdmins = activeClients.filter((client) => client.isAdmin);
+      const remainingAdmins = activeClients.filter((client) => client.isAdmin);
 
-        if (remainingAdmins.length === 0) {
-          // Promote the most recently active client — promoting a backgrounded
-          // lurker could leave a room where nobody present can control playback
-          const newAdmin = activeClients.reduce((a, b) => (a.lastSeenAt >= b.lastSeenAt ? a : b));
+      if (remainingAdmins.length === 0) {
+        // Promote the most recently active client — promoting a backgrounded
+        // lurker could leave a room where nobody present can control playback
+        const newAdmin = activeClients.reduce((a, b) => (a.lastSeenAt >= b.lastSeenAt ? a : b));
 
-          newAdmin.isAdmin = true;
-          this.clientData.set(newAdmin.clientId, newAdmin);
-          console.log(
-            `✨ Automatically promoted ${newAdmin.username} (${newAdmin.clientId}) to admin in room ${this.roomId}`
-          );
-        }
+        newAdmin.isAdmin = true;
+        this.clientData.set(newAdmin.clientId, newAdmin);
+        console.log(
+          `✨ Automatically promoted ${newAdmin.username} (${newAdmin.clientId}) to admin in room ${this.roomId}`
+        );
       }
     } else {
       // Stop heartbeat checking if no clients remain
