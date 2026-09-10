@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 import { useGlobalStore } from "@/store/global";
 import { sendWSRequest } from "@/utils/ws";
 import { ClientActionEnum, TrackType } from "@beatsync/shared";
-import { Plus } from "lucide-react";
+import { Music, Plus, UploadCloud } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useRef } from "react";
 import { toast } from "sonner";
@@ -181,27 +181,39 @@ export function SearchResults({ className, onTrackSelect }: SearchResultsProps) 
   if (searchResults && searchResults.type === "error") {
     return (
       <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className="flex flex-col items-center justify-center py-8"
+        initial={{ opacity: 0, y: 4 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="flex flex-col items-center justify-center py-6 px-4 text-center"
       >
+        <div className="w-10 h-10 rounded-full bg-primary-950/80 border border-primary-500/30 flex items-center justify-center mb-3">
+          <Music className="size-5 text-primary-400" />
+        </div>
+
         <motion.h3
-          className="text-base font-medium tracking-tight mb-1"
+          className="text-sm font-semibold tracking-tight mb-1 text-white"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.3, delay: 0.1 }}
         >
-          💀
+          Online Search in Beta
         </motion.h3>
 
         <motion.p
-          className="text-neutral-400 text-center text-xs"
+          className="text-neutral-400 text-xs max-w-xs mb-3.5 leading-relaxed"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.3, delay: 0.15 }}
         >
-          {searchResults.message}
+          {searchResults.message || "Online search requires an external provider."}
         </motion.p>
+
+        <label
+          htmlFor="audio-upload"
+          className="inline-flex items-center gap-2 px-4 py-2 bg-primary-600 hover:bg-primary-500 active:bg-primary-700 text-white rounded-lg text-xs font-medium cursor-pointer transition-all duration-150 shadow-md shadow-primary-950/50 hover:scale-[1.02]"
+        >
+          <UploadCloud className="size-4" />
+          <span>Upload Audio File (.mp3, .wav, .m4a)</span>
+        </label>
       </motion.div>
     );
   }

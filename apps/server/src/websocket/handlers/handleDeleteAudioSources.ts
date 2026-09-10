@@ -1,4 +1,4 @@
-import { IS_DEMO_MODE } from "@/demo";
+import { AUDIO_FILE_CACHE, IS_DEMO_MODE } from "@/demo";
 import { deleteObject, extractKeyFromUrl } from "@/lib/r2";
 import { sendBroadcast } from "@/utils/responses";
 import { requireCanMutate } from "@/websocket/middlewares";
@@ -43,8 +43,12 @@ export const handleDeleteAudioSources: HandlerFunction<ExtractWSRequestFrom["DEL
 
   // Process R2 deletions and track successes
   const r2DeletionPromises = urlsToDelete.map(async (url) => {
-    // Always add non-R2 URLs (like default tracks) to successful list
+    // Always add non-R2 URLs (like local direct uploads and default tracks) to successful list
     if (!url.includes(roomPrefix)) {
+      if (url.includes("/audio/")) {
+        const filename = decodeURIComponent(url.slice(url.lastIndexOf("/audio/") + "/audio/".length));
+        AUDIO_FILE_CACHE.delete(filename);
+      }
       successfullyDeletedUrls.add(url); // Just say we've processed it
       return;
     }

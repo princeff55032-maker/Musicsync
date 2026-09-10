@@ -28,7 +28,7 @@ export const metadata: Metadata = {
   description:
     "Turn every device into a synchronized speaker. Musicsync is an open-source music player for multi-device audio playback. Host a listening party today!",
   keywords: ["music", "sync", "audio", "collaboration", "real-time"],
-  authors: [{ name: "Freeman Jiang" }],
+  authors: [{ name: "Musicsync" }],
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
