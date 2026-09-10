@@ -74,7 +74,7 @@ export const Join = () => {
     // Generate a random 6-digit room ID
     const newRoomId = Math.floor(100000 + Math.random() * 900000).toString();
 
-    router.push(`/room/${newRoomId}`);
+    router.push(`/room/${newRoomId}?admin=musicsync`);
   };
 
   const handleRegenerateName = () => {

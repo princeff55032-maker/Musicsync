@@ -26,7 +26,7 @@ export const handleWebSocketUpgrade = (req: Request, server: BunServer) => {
   }
 
   // Check if client provided valid admin secret
-  const isAdmin = IS_DEMO_MODE && isValidAdminSecret(adminSecret);
+  const isAdmin = isValidAdminSecret(adminSecret);
 
   const isCreator = !IS_DEMO_MODE && !!CREATOR_SECRET && creatorSecret === CREATOR_SECRET;
 

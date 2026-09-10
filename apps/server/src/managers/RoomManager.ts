@@ -350,8 +350,9 @@ export class RoomManager {
       clientData.nudgeMs = cachedClient.nudgeMs;
     }
 
-    // First client in the room always gets admin.
-    if (this.wsConnections.size === 0) {
+    // First client in the room, or if room currently has no admins, grant admin.
+    const activeAdmins = Array.from(this.clientData.values()).filter((c) => c.isAdmin);
+    if (this.wsConnections.size === 0 || activeAdmins.length === 0) {
       clientData.isAdmin = true;
     }
 
