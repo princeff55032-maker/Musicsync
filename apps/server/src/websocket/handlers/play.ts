@@ -6,7 +6,12 @@ import type { HandlerFunction } from "@/websocket/types";
 export const handlePlay: HandlerFunction<ExtractWSRequestFrom["PLAY"]> = ({ ws, message, server }) => {
   const { room } = requireCanMutate(ws);
 
-  // Initiate audio loading for all clients so all devices are buffered before play
-  room.initiateAudioSourceLoad(message, ws.data.clientId, server);
+  // Notify all connected clients to buffer this track
+  room.broadcastLoadAudioSource(message.audioSource, server);
+
+  // Execute playback immediately with dynamic network scheduling (~200-400ms)
+  // No artificial 10-15s timeout delays!
+  room.executeImmediatePlay(message, server);
 };
+
 

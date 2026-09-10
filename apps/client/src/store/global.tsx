@@ -515,8 +515,8 @@ export const useGlobalStore = create<GlobalState>((set, get) => {
         },
       });
 
-      // If this track is currently selected and playback is active, sync immediately
-      if (get().selectedAudioUrl === url && get().isPlaying) {
+      // If this track is currently selected, sync immediately to catch playback
+      if (get().selectedAudioUrl === url) {
         sendWSRequest({
           ws: socket,
           request: { type: ClientActionEnum.enum.SYNC },

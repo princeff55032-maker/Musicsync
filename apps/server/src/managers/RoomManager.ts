@@ -227,6 +227,29 @@ export class RoomManager {
   }
 
   /**
+   * Broadcast LOAD_AUDIO_SOURCE to notify all clients to buffer a source
+   */
+  broadcastLoadAudioSource(audioSourceUrl: string, server: BunServer): void {
+    const normalizeUrl = (u: string) => (u ? u.replace(/^https?:\/\//i, "") : "");
+    const audioSource = this.audioSources.find(
+      (source) => normalizeUrl(source.url) === normalizeUrl(audioSourceUrl)
+    );
+    if (!audioSource) return;
+
+    sendBroadcast({
+      server,
+      roomId: this.roomId,
+      message: {
+        type: "ROOM_EVENT",
+        event: {
+          type: "LOAD_AUDIO_SOURCE",
+          audioSourceToPlay: audioSource,
+        },
+      },
+    });
+  }
+
+  /**
    * Process when a client reports they've loaded the audio source
    */
   processClientLoadedAudioSource(clientId: string, server: BunServer): void {
@@ -236,12 +259,13 @@ export class RoomManager {
       this.debouncedAudioReady();
     }
 
+    // If client loaded a source while playback is active in the room, sync them immediately
+    const ws = this.wsConnections.get(clientId);
+    if (ws && this.playbackState.type === "playing") {
+      this.syncClient(ws);
+    }
+
     if (!this.pendingPlay) {
-      // If client loaded a source while playback is already active in the room, sync them
-      const ws = this.wsConnections.get(clientId);
-      if (ws && this.playbackState.type === "playing") {
-        this.syncClient(ws);
-      }
       return;
     }
 
