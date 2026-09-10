@@ -1,4 +1,4 @@
-import { DEMO_ROOM_ID, IS_DEMO_MODE, isValidAdminSecret } from "@/demo";
+import { IS_DEMO_MODE, isValidAdminSecret } from "@/demo";
 import { errorResponse } from "@/utils/responses";
 import type { BunServer, WSData } from "@/utils/websocket";
 
@@ -23,11 +23,6 @@ export const handleWebSocketUpgrade = (req: Request, server: BunServer) => {
     console.log(`WebSocket connection attempt missing parameters: ${missingParams.join(", ")}`);
 
     return errorResponse("roomId, username and clientId are required");
-  }
-
-  if (IS_DEMO_MODE && roomId !== DEMO_ROOM_ID) {
-    console.log(`Demo mode: rejected room ${roomId} (only ${DEMO_ROOM_ID} allowed)`);
-    return errorResponse(`Only room ${DEMO_ROOM_ID} is available in demo mode`);
   }
 
   // Check if client provided valid admin secret
