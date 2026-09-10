@@ -39,11 +39,14 @@ export const handleGetPresignedURL = async (req: Request) => {
     // Validate R2 configuration; fall back to local direct server upload if R2 is not configured
     const r2Validation = validateR2Config();
     if (!r2Validation.isValid) {
-      const origin = new URL(req.url).origin;
+      const host = req.headers.get("x-forwarded-host") || req.headers.get("host") || new URL(req.url).host;
+      const isLocal = host.includes("localhost") || host.includes("127.0.0.1");
+      const proto = isLocal ? "http" : (req.headers.get("x-forwarded-proto") || "https");
+      const origin = `${proto}://${host}`;
       const uploadUrl = `${origin}/upload/direct?file=${encodeURIComponent(uniqueFileName)}`;
       const publicUrl = `${origin}/audio/${encodeURIComponent(uniqueFileName)}`;
 
-      console.log(`R2 not configured — using local direct upload: ${uniqueFileName}`);
+      console.log(`R2 not configured — using local direct upload (${proto}): ${uniqueFileName}`);
 
       const response: UploadUrlResponseType = {
         uploadUrl,

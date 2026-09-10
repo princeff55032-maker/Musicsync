@@ -9,7 +9,7 @@ export function handleServeAudio(pathname: string): Response {
     return errorResponse("File not found", 404);
   }
 
-  return new Response(cached.bytes.buffer as ArrayBuffer, {
+  return new Response(new Uint8Array(cached.bytes), {
     headers: {
       ...corsHeaders,
       "Content-Type": cached.type,
