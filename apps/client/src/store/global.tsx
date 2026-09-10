@@ -347,7 +347,16 @@ const getWaitTimeSeconds = (state: GlobalState, targetServerTime: number) => {
   return Math.max(0, (waitTimeMilliseconds - outputLatencyMs) / 1000);
 };
 
-const resolveAudioUrl = (url: string): string => (url.startsWith("/") ? `${getApiUrl()}${url}` : url);
+const resolveAudioUrl = (url: string): string => {
+  if (!url) return "";
+  if (url.startsWith("/")) {
+    return `${getApiUrl()}${url}`;
+  }
+  if (typeof window !== "undefined" && window.location.protocol === "https:" && url.startsWith("http://")) {
+    return url.replace(/^http:\/\//i, "https://");
+  }
+  return url;
+};
 
 const downloadBufferFromURL = async (data: { url: string; onProgress?: (loaded: number, total: number) => void }) => {
   const response = await fetch(resolveAudioUrl(data.url));

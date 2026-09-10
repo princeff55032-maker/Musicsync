@@ -169,8 +169,11 @@ export class RoomManager {
     // Clear any existing loading state
     this.clearAudioLoadingState();
 
-    // Find the audio source to load
-    const audioSource = this.audioSources.find((source) => source.url === playAction.audioSource);
+    // Find the audio source to load (normalizing protocol to handle http vs https seamlessly)
+    const normalizeUrl = (u: string) => (u ? u.replace(/^https?:\/\//i, "") : "");
+    const audioSource = this.audioSources.find(
+      (source) => normalizeUrl(source.url) === normalizeUrl(playAction.audioSource)
+    );
 
     if (!audioSource) {
       console.warn(`Cannot load non-existent audio source: ${playAction.audioSource}`);
@@ -868,7 +871,10 @@ export class RoomManager {
     // Pause can reference a track that might have been deleted, which is ok
     // But we should validate if the track is specified
     if (pauseSchema.audioSource) {
-      const trackExists = this.audioSources.some((source) => source.url === pauseSchema.audioSource);
+      const normalizeUrl = (u: string) => (u ? u.replace(/^https?:\/\//i, "") : "");
+      const trackExists = this.audioSources.some(
+        (source) => normalizeUrl(source.url) === normalizeUrl(pauseSchema.audioSource)
+      );
 
       if (!trackExists) {
         console.warn(`Room ${this.roomId}: Attempted to pause non-existent track: ${pauseSchema.audioSource}`);
@@ -894,7 +900,10 @@ export class RoomManager {
 
   updatePlaybackSchedulePlay(playSchema: PlayActionType, serverTimeToExecute: number): boolean {
     // Validate that the audio source exists in the room
-    const trackExists = this.audioSources.some((source) => source.url === playSchema.audioSource);
+    const normalizeUrl = (u: string) => (u ? u.replace(/^https?:\/\//i, "") : "");
+    const trackExists = this.audioSources.some(
+      (source) => normalizeUrl(source.url) === normalizeUrl(playSchema.audioSource)
+    );
 
     if (!trackExists) {
       console.warn(`Room ${this.roomId}: Attempted to play non-existent track: ${playSchema.audioSource}`);

@@ -1,4 +1,5 @@
 import { cn, formatTime } from "@/lib/utils";
+import { audioContextManager } from "@/lib/audioContextManager";
 
 import { useCanMutate, useGlobalStore } from "@/store/global";
 import { Pause, Play, Repeat, Shuffle, SkipBack, SkipForward } from "lucide-react";
@@ -124,8 +125,13 @@ export const Player = () => {
     commitSeek();
   }, [commitSeek]);
 
-  const handlePlay = () => {
+  const handlePlay = async () => {
     if (!canMutate) return;
+    try {
+      await audioContextManager.resume();
+    } catch {
+      // AudioContext resume handled by user interaction
+    }
     const state = useGlobalStore.getState();
     if (state.isPlaying) {
       state.broadcastPause();
