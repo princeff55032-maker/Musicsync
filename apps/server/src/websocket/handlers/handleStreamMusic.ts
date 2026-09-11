@@ -111,13 +111,15 @@ export const handleStreamMusic: HandlerFunction<ExtractWSRequestFrom["STREAM_MUS
       finalAudioUrl = `${getServerOrigin()}/audio/${encodeURIComponent(fileName)}`;
     }
 
+    const isRoomIdle = room.getPlaybackState().type !== "playing";
+
     // Add the audio source to the room and get updated sources list
     const sources = room.addAudioSource({ url: finalAudioUrl });
 
     console.log(`Successfully added track: ${finalAudioUrl}`);
     console.log(`Broadcasting new audio sources to room ${roomId}: ${sources.length} total sources`);
 
-    // Broadcast to all room members that new audio is available
+    // Broadcast to all room members that new audio is available and selected
     sendBroadcast({
       server,
       roomId,
@@ -126,9 +128,24 @@ export const handleStreamMusic: HandlerFunction<ExtractWSRequestFrom["STREAM_MUS
         event: {
           type: "SET_AUDIO_SOURCES",
           sources,
+          currentAudioSource: isRoomIdle ? finalAudioUrl : undefined,
         },
       },
     });
+
+    // If nothing was playing, automatically start playing the selected song in sync!
+    if (isRoomIdle) {
+      console.log(`Room ${roomId} is idle. Automatically starting playback for: ${finalAudioUrl}`);
+      room.broadcastLoadAudioSource(finalAudioUrl, server);
+      room.executeImmediatePlay(
+        {
+          type: "PLAY",
+          trackTimeSeconds: 0,
+          audioSource: finalAudioUrl,
+        },
+        server
+      );
+    }
   } catch (error) {
     console.error("Error in handleStreamMusic:", error);
   } finally {

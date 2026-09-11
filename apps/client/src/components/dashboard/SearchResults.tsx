@@ -10,6 +10,7 @@ import { Music, Plus, UploadCloud } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useRef } from "react";
 import { toast } from "sonner";
+import { audioContextManager } from "@/lib/audioContextManager";
 
 interface SearchResultsProps {
   className?: string;
@@ -62,6 +63,12 @@ export function SearchResults({ className, onTrackSelect }: SearchResultsProps) 
     if (!socket) {
       toast.error("Not connected to server");
       return;
+    }
+
+    try {
+      await audioContextManager.resume();
+    } catch {
+      // Audio context resume handled
     }
 
     // Check if this track is already being streamed
