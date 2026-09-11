@@ -263,17 +263,33 @@ export class MusicProviderManager {
   /**
    * Resolves a track ID into a direct audio stream URL
    */
-  async stream(trackId: number): Promise<z.infer<typeof StreamResponseSchema>> {
+  async stream(trackId: number, fallbackTrackName?: string): Promise<z.infer<typeof StreamResponseSchema>> {
     try {
       const { id } = TrackParamsSchema.parse({ id: trackId });
 
       // Look up track in in-memory cache
       let trackInfo = this.trackCache.get(id);
 
-      // If not in cache (e.g. server restarted between search and click), fetch by song ID
+      // If not in cache (e.g. server restarted or instance changed), attempt fallback resolution
       if (!trackInfo || !trackInfo.encryptedMediaUrl) {
-        // Fallback query to find details
-        console.log(`[MusicProviderManager] Track ${id} not in memory cache, attempting fallback resolution`);
+        console.log(`[MusicProviderManager] Track ${id} not in memory cache, attempting fallback resolution with track name: ${fallbackTrackName}`);
+        if (fallbackTrackName) {
+          // Clean track name for searching (e.g. remove "Artist - " prefix)
+          const cleanName = fallbackTrackName.includes("-")
+            ? fallbackTrackName.split("-").slice(1).join("-").trim()
+            : fallbackTrackName.trim();
+
+          await this.search(cleanName || fallbackTrackName);
+          trackInfo = this.trackCache.get(id);
+
+          // If still not matched by numericId, take the top result from search
+          if (!trackInfo || !trackInfo.encryptedMediaUrl) {
+            const allCached = Array.from(this.trackCache.values());
+            if (allCached.length > 0) {
+              trackInfo = allCached[allCached.length - 1];
+            }
+          }
+        }
       }
 
       let streamUrl = trackInfo?.streamUrl;
@@ -284,7 +300,7 @@ export class MusicProviderManager {
       }
 
       if (!streamUrl) {
-        throw new Error(`Could not resolve stream URL for track ${id}`);
+        throw new Error(`Could not resolve stream URL for track ${id} (${fallbackTrackName || "unknown"})`);
       }
 
       const response = {

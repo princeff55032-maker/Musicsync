@@ -311,6 +311,10 @@ export function InlineSearch() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.2, ease: "easeOut" }}
+            onMouseDown={(e) => {
+              // Prevent input blur when clicking inside the dropdown
+              e.preventDefault();
+            }}
             className="absolute top-full mt-2 w-full bg-neutral-900/95 backdrop-blur-xl border border-neutral-700/50 rounded-2xl shadow-2xl overflow-hidden z-[60]"
           >
             {/* Mobile close button */}

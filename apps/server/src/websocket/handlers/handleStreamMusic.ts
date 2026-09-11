@@ -53,8 +53,8 @@ export const handleStreamMusic: HandlerFunction<ExtractWSRequestFrom["STREAM_MUS
   });
 
   try {
-    // Get the stream URL from the music provider
-    const streamResponse = await MUSIC_PROVIDER_MANAGER.stream(message.trackId);
+    // Get the stream URL from the music provider (with fallback resolution by name)
+    const streamResponse = await MUSIC_PROVIDER_MANAGER.stream(message.trackId, message.trackName);
 
     if (!streamResponse.success) {
       throw new Error("Failed to get stream URL");

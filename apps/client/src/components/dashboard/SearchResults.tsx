@@ -101,7 +101,7 @@ export function SearchResults({ className, onTrackSelect }: SearchResultsProps) 
       // Call the callback to handle UI dismissal
       onTrackSelect?.();
 
-      // toast.success(`Adding "${formattedTrackName}" to queue...`);
+      toast.info(`Adding "${formattedTrackName}" to room...`);
     } catch (error) {
       console.error("Failed to add track:", error);
       toast.error("Failed to add track to queue");
@@ -341,8 +341,19 @@ export function SearchResults({ className, onTrackSelect }: SearchResultsProps) 
                 delay: index * 0.06,
                 ease: "easeInOut",
               }}
-              className="group hover:bg-neutral-800 px-3 py-2 transition-all duration-200 cursor-pointer flex items-center gap-3 rounded-md"
+              className="group hover:bg-neutral-800 px-3 py-2 transition-all duration-200 cursor-pointer flex items-center gap-3 rounded-md select-none focus:outline-none focus:ring-1 focus:ring-primary-500"
+              role="button"
+              tabIndex={0}
+              onMouseDown={(e) => {
+                e.preventDefault();
+              }}
               onClick={() => handleAddTrack(track)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  handleAddTrack(track);
+                }
+              }}
             >
               {/* Album Art */}
               <div className="relative flex-shrink-0">
