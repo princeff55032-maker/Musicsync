@@ -31,7 +31,7 @@ export const WS_REGISTRY: WebsocketRegistry = {
   },
   [ClientActionEnum.enum.NTP_REQUEST]: {
     handle: handleNTPRequest,
-    description: "Time synchronization request for NTP-based sync",
+    description: "NTP (no-op — handled by fast-path in handleMessage)",
   },
   [ClientActionEnum.enum.PLAY]: {
     handle: handlePlay,

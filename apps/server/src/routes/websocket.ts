@@ -35,7 +35,7 @@ export const handleWebSocketUpgrade = (req: Request, server: BunServer) => {
 
   const data: WSData = {
     roomId,
-    username: isCreator ? "freemanjiang" : username,
+    username: isCreator ? "Prince" : username,
     clientId,
     isAdmin,
     isCreator,

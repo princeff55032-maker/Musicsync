@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { audioContextManager, isAudioContextPaused } from "@/lib/audioContextManager";
 import { getClientId } from "@/lib/clientId";
 import { getKickBuffer } from "@/components/dashboard/Metronome";

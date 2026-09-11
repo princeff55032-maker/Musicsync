@@ -1,6 +1,7 @@
 "use client";
 import { generateName } from "@/lib/randomNames";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
+import { useMediaSession } from "@/hooks/useMediaSession";
 import { useRoomStore } from "@/store/room";
 import { motion } from "motion/react";
 import { useEffect } from "react";
@@ -21,6 +22,9 @@ export const NewSyncer = ({ roomId }: NewSyncerProps) => {
 
   // Update document title based on playback state
   useDocumentTitle();
+
+  // Control lock screen and media session
+  useMediaSession();
 
   // Generate a new random username when the component mounts
   useEffect(() => {

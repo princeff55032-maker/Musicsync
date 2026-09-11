@@ -8,7 +8,7 @@ export const handleStopSpatialAudio: HandlerFunction<ExtractWSRequestFrom["STOP_
   // Stop the spatial audio interval if it exists
   const { room } = requireCanMutate(ws); // do nothing if no room exists
 
-  // This important for
+  // Broadcast stop to all clients so they reset their spatial gain to 1.0
   const broadcastMessage: WSBroadcastType = {
     type: "SCHEDULED_ACTION",
     scheduledAction: {
