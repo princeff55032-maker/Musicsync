@@ -36,8 +36,19 @@ export const trimFileName = (fileName: string) => {
 };
 
 export const extractFileNameFromUrl = (url: string) => {
+  if (!url) return "";
+
+  // If URL has a hash fragment containing the song title, decode and return it
+  if (url.includes("#")) {
+    const hash = url.slice(url.indexOf("#") + 1);
+    if (hash.trim()) {
+      return decodeURIComponent(hash.trim());
+    }
+  }
+
   // Get everything after the last slash
-  const parts = url.split("/");
+  const urlWithoutHash = url.split("#")[0];
+  const parts = urlWithoutHash.split("/");
   if (parts.length > 1) {
     const encodedFileName = parts[parts.length - 1];
 
@@ -56,5 +67,5 @@ export const extractFileNameFromUrl = (url: string) => {
     return trimFileName(fullFileName);
   }
 
-  throw new Error(`Invalid URL: ${url}`);
+  return url;
 };

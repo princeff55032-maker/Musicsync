@@ -48,8 +48,9 @@ export const handleStreamMusic: HandlerFunction<ExtractWSRequestFrom["STREAM_MUS
 
     const streamUrl = streamResponse.data.url;
 
-    // Use direct high-speed CDN streaming (zero server memory overhead, instant start)
-    const finalAudioUrl = streamUrl;
+    // Use direct high-speed CDN streaming with human-readable track name in hash
+    const originalName = message.trackName ?? `track-${message.trackId}`;
+    const finalAudioUrl = `${streamUrl}#${encodeURIComponent(originalName)}`;
 
     const isRoomIdle = room.getPlaybackState().type !== "playing";
 

@@ -349,13 +349,15 @@ const getWaitTimeSeconds = (state: GlobalState, targetServerTime: number) => {
 
 const resolveAudioUrl = (url: string): string => {
   if (!url) return "";
-  if (url.startsWith("/")) {
-    return `${getApiUrl()}${url}`;
+  // Strip hash fragment for clean network fetch
+  const cleanUrl = url.split("#")[0];
+  if (cleanUrl.startsWith("/")) {
+    return `${getApiUrl()}${cleanUrl}`;
   }
-  if (typeof window !== "undefined" && window.location.protocol === "https:" && url.startsWith("http://")) {
-    return url.replace(/^http:\/\//i, "https://");
+  if (typeof window !== "undefined" && window.location.protocol === "https:" && cleanUrl.startsWith("http://")) {
+    return cleanUrl.replace(/^http:\/\//i, "https://");
   }
-  return url;
+  return cleanUrl;
 };
 
 const downloadBufferFromURL = async (data: { url: string; onProgress?: (loaded: number, total: number) => void }) => {
