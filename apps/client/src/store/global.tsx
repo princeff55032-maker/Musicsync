@@ -158,6 +158,13 @@ interface GlobalStateValues {
 
   // Whether nudge has been restored from server this connection (prevents re-restore on subsequent CLIENT_CHANGE)
   didRestoreNudge: boolean;
+
+  // Screen Sharing
+  isScreenSharing: boolean;
+  screenSharer: { clientId: string; username: string } | null;
+  localStream: MediaStream | null;
+  remoteStream: MediaStream | null;
+  screenShareVolume: number;
 }
 
 interface GlobalState extends GlobalStateValues {
@@ -233,6 +240,13 @@ interface GlobalState extends GlobalStateValues {
   loadAudioSource: (url: string) => Promise<void>;
   handleLoadAudioSource: (sources: LoadAudioSourceType) => void;
   broadcastReorder: (urls: AudioSourceType[]) => void;
+
+  // Screen Sharing methods
+  setScreenSharer: (sharer: { clientId: string; username: string } | null) => void;
+  setLocalStream: (stream: MediaStream | null) => void;
+  setRemoteStream: (stream: MediaStream | null) => void;
+  setScreenShareVolume: (volume: number) => void;
+  setIsScreenSharing: (isSharing: boolean) => void;
 }
 
 // Define initial state values
@@ -307,6 +321,13 @@ const initialState: GlobalStateValues = {
   lowPassFreq: LOW_PASS_CONSTANTS.MAX_FREQ,
 
   didRestoreNudge: false,
+
+  // Screen Sharing
+  isScreenSharing: false,
+  screenSharer: null,
+  localStream: null,
+  remoteStream: null,
+  screenShareVolume: 1,
 };
 
 const getAudioPlayer = (state: GlobalState) => {
@@ -1685,5 +1706,12 @@ export const useGlobalStore = create<GlobalState>((set, get) => {
       set({ selectedAudioUrl: audioSourceToPlay.url });
       loadAudioSource(audioSourceToPlay.url);
     },
+
+    // Screen sharing actions
+    setScreenSharer: (sharer) => set({ screenSharer: sharer }),
+    setLocalStream: (stream) => set({ localStream: stream }),
+    setRemoteStream: (stream) => set({ remoteStream: stream }),
+    setScreenShareVolume: (volume) => set({ screenShareVolume: volume }),
+    setIsScreenSharing: (isSharing) => set({ isScreenSharing: isSharing }),
   };
 });

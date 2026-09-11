@@ -123,6 +123,7 @@ export class RoomManager {
   private globalVolume = 1.0;
   private lowPassFreq: number = LOW_PASS_CONSTANTS.MAX_FREQ; // Default bypassed (full spectrum)
   private isMetronomeEnabled = false;
+  private activeScreenSharer: { clientId: string; username: string } | null = null;
   // Map of trackId to job status
   private activeStreamJobs = new Map<string, { status: string }>();
   private chatManager: ChatManager;
@@ -449,8 +450,25 @@ export class RoomManager {
       }
     }
 
+    // Clear active screen sharer if this client was sharing
+    if (this.activeScreenSharer?.clientId === clientId) {
+      this.activeScreenSharer = null;
+    }
+
     // Notify that client count changed
     this.onClientCountChange?.();
+  }
+
+  getScreenSharer(): { clientId: string; username: string } | null {
+    return this.activeScreenSharer;
+  }
+
+  setScreenSharer(sharer: { clientId: string; username: string } | null): void {
+    this.activeScreenSharer = sharer;
+  }
+
+  getClientWs(clientId: string): ServerWebSocket<WSData> | undefined {
+    return this.wsConnections.get(clientId);
   }
 
   setAdmin({ targetClientId, isAdmin }: { targetClientId: string; isAdmin: boolean }): void {

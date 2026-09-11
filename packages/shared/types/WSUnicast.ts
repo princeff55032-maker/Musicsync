@@ -2,6 +2,7 @@
 import { z } from "zod";
 import { ScheduledActionSchema, ServerActionEnum } from "./WSBroadcast";
 import { SearchResponseSchema } from "./provider";
+import { WebRTCSignalDataSchema } from "./WSRequest";
 
 const NTPResponseMessageSchema = z.object({
   type: z.literal(ServerActionEnum.enum.NTP_RESPONSE),
@@ -26,10 +27,20 @@ const LivenessPingMessageSchema = z.object({
   type: z.literal(ServerActionEnum.enum.LIVENESS_PING),
 });
 
+export const WebRTCSignalRelaySchema = z.object({
+  type: z.literal(ServerActionEnum.enum.WEBRTC_SIGNAL),
+  fromClientId: z.string(),
+  fromUsername: z.string().optional(),
+  signal: WebRTCSignalDataSchema,
+});
+export type WebRTCSignalRelayType = z.infer<typeof WebRTCSignalRelaySchema>;
+
 export const WSUnicastSchema = z.discriminatedUnion("type", [
   NTPResponseMessageSchema,
   ScheduledActionSchema,
   MusicSearchResponseSchema,
   LivenessPingMessageSchema,
+  WebRTCSignalRelaySchema,
 ]);
 export type WSUnicastType = z.infer<typeof WSUnicastSchema>;
+

@@ -2,7 +2,8 @@
 import { SOCIAL_LINKS } from "@/constants";
 import { audioContextManager } from "@/lib/audioContextManager";
 import { MAX_NTP_MEASUREMENTS, useGlobalStore } from "@/store/global";
-import { Crown, Hash, Users } from "lucide-react";
+import { Crown, Hash, MonitorOff, MonitorUp, Radio, Users } from "lucide-react";
+import { useScreenShare } from "@/hooks/useScreenShare";
 import { AnimatePresence, motion } from "motion/react";
 import Link from "next/link";
 import { FaDiscord, FaGithub } from "react-icons/fa";
@@ -23,6 +24,8 @@ export const TopBar = ({ roomId }: TopBarProps) => {
   // Get current user from global store to check admin status
   const currentUser = useGlobalStore((state) => state.currentUser);
   const isAdmin = currentUser?.isAdmin || false;
+
+  const { isScreenSharing, screenSharer, startShare, stopShare } = useScreenShare();
 
   // Show minimal nav bar when synced and not loading
   if (!isLoadingAudio && isSynced) {
@@ -95,6 +98,34 @@ export const TopBar = ({ roomId }: TopBarProps) => {
         </div>
 
         <div className="flex items-center justify-center gap-2.5">
+          {/* Screen Share Action Button */}
+          {isScreenSharing ? (
+            <button
+              onClick={stopShare}
+              className="flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-600/80 hover:bg-red-500 text-white border border-red-500/50 shadow-sm transition-all active:scale-95 animate-pulse cursor-pointer"
+              title="Stop sharing your screen"
+            >
+              <MonitorOff className="w-3 h-3" />
+              <span>Stop Share</span>
+            </button>
+          ) : screenSharer ? (
+            <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              <span>{screenSharer.username} Live</span>
+            </div>
+          ) : (
+            <button
+              onClick={startShare}
+              className="flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium text-neutral-300 hover:text-white bg-neutral-800/80 hover:bg-neutral-700/80 border border-neutral-700 transition-all active:scale-95 cursor-pointer"
+              title="Share your screen with the room"
+            >
+              <MonitorUp className="w-3 h-3 text-neutral-400" />
+              <span>Share Screen</span>
+            </button>
+          )}
+
+          <div className="hidden sm:block text-neutral-700">|</div>
+
           {/* Discord icon */}
           <a
             href={SOCIAL_LINKS.discord}

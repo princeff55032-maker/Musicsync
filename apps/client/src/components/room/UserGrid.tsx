@@ -3,7 +3,7 @@ import { useClientId } from "@/hooks/useClientId";
 import { cn } from "@/lib/utils";
 import { useCanMutate, useGlobalStore } from "@/store/global";
 import { ClientDataType, GRID } from "@beatsync/shared";
-import { ArrowUp, Crown, HeadphonesIcon, Rotate3D } from "lucide-react";
+import { ArrowUp, Crown, HeadphonesIcon, Monitor, Rotate3D } from "lucide-react";
 import { motion } from "motion/react";
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { SpatialGainMeter } from "../dashboard/SpatialGainMeter";
@@ -18,10 +18,11 @@ interface ClientAvatarProps {
   isCurrentUser: boolean;
   animationSyncKey: number;
   isGridEnabled: boolean;
+  isSharing?: boolean;
 }
 
 // Separate Client Avatar component for better performance
-const ClientAvatar = memo<ClientAvatarProps>(({ client, isCurrentUser, animationSyncKey, isGridEnabled }) => {
+const ClientAvatar = memo<ClientAvatarProps>(({ client, isCurrentUser, animationSyncKey, isGridEnabled, isSharing }) => {
   return (
     <Tooltip key={client.clientId}>
       <TooltipTrigger asChild>
@@ -69,6 +70,12 @@ const ClientAvatar = memo<ClientAvatarProps>(({ client, isCurrentUser, animation
                 <Crown className="h-2.5 w-2.5 text-yellow-900" fill="currentColor" />
               </div>
             )}
+            {/* Screen sharing live indicator */}
+            {isSharing && (
+              <div className="absolute -bottom-0.5 -right-0.5 bg-red-500 rounded-full p-0.5 border border-neutral-900 shadow-md animate-pulse">
+                <Monitor className="h-2.5 w-2.5 text-white" />
+              </div>
+            )}
           </div>
         </motion.div>
       </TooltipTrigger>
@@ -77,6 +84,7 @@ const ClientAvatar = memo<ClientAvatarProps>(({ client, isCurrentUser, animation
         <div className="text-xs text-muted-foreground">
           {isCurrentUser ? "You" : "Connected"}
           {client.isAdmin && " • Admin"}
+          {isSharing && " • Sharing Screen"}
         </div>
       </TooltipContent>
     </Tooltip>
@@ -100,6 +108,8 @@ export const UserGrid = () => {
 
   // Use clients from global store
   const clients = useGlobalStore((state) => state.connectedClients);
+  const isScreenSharing = useGlobalStore((state) => state.isScreenSharing);
+  const screenSharer = useGlobalStore((state) => state.screenSharer);
 
   // State to track dragging status
   const isDraggingListeningSource = useGlobalStore((state) => state.isDraggingListeningSource);
@@ -341,6 +351,7 @@ export const UserGrid = () => {
                     client={client}
                     animationSyncKey={animationSyncKey}
                     isGridEnabled={isSpatialAudioEnabled}
+                    isSharing={isCurrentUser ? isScreenSharing : screenSharer?.clientId === client.clientId}
                   />
                 ))}
 

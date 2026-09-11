@@ -36,6 +36,9 @@ export const ClientActionEnum = z.enum([
   "SET_METRONOME", // Toggle metronome on/off for all clients
   "SET_LOW_PASS_FREQ", // Set low-pass filter cutoff frequency
   "LIVENESS_PONG", // Liveness reply to a server LIVENESS_PING
+  "START_SCREEN_SHARE", // Start sharing screen in room
+  "STOP_SCREEN_SHARE", // Stop sharing screen in room
+  "WEBRTC_SIGNAL", // WebRTC P2P signaling relay
 ]);
 
 export const NTPRequestPacketSchema = z.object({
@@ -166,6 +169,28 @@ export const LivenessPongSchema = z.object({
   type: z.literal(ClientActionEnum.enum.LIVENESS_PONG),
 });
 
+export const StartScreenShareSchema = z.object({
+  type: z.literal(ClientActionEnum.enum.START_SCREEN_SHARE),
+});
+
+export const StopScreenShareSchema = z.object({
+  type: z.literal(ClientActionEnum.enum.STOP_SCREEN_SHARE),
+});
+
+export const WebRTCSignalDataSchema = z.object({
+  type: z.enum(["offer", "answer", "candidate"]),
+  sdp: z.string().optional(),
+  candidate: z.any().optional(),
+});
+export type WebRTCSignalDataType = z.infer<typeof WebRTCSignalDataSchema>;
+
+export const WebRTCSignalSchema = z.object({
+  type: z.literal(ClientActionEnum.enum.WEBRTC_SIGNAL),
+  targetClientId: z.string(),
+  signal: WebRTCSignalDataSchema,
+});
+export type WebRTCSignalType = z.infer<typeof WebRTCSignalSchema>;
+
 export const WSRequestSchema = z.discriminatedUnion("type", [
   PlayActionSchema,
   PauseActionSchema,
@@ -190,6 +215,9 @@ export const WSRequestSchema = z.discriminatedUnion("type", [
   SetMetronomeSchema,
   SetLowPassFreqSchema,
   LivenessPongSchema,
+  StartScreenShareSchema,
+  StopScreenShareSchema,
+  WebRTCSignalSchema,
 ]);
 export type WSRequestType = z.infer<typeof WSRequestSchema>;
 export type PlayActionType = z.infer<typeof PlayActionSchema>;
@@ -197,8 +225,11 @@ export type PauseActionType = z.infer<typeof PauseActionSchema>;
 export type ReorderClientType = z.infer<typeof ReorderClientSchema>;
 export type SetListeningSourceType = z.infer<typeof SetListeningSourceSchema>;
 export type ReorderAudioSourcesType = z.infer<typeof ReorderAudioSourcesSchema>;
+export type StartScreenShareType = z.infer<typeof StartScreenShareSchema>;
+export type StopScreenShareType = z.infer<typeof StopScreenShareSchema>;
 
 // Mapped type to access request types by their type field
 export type ExtractWSRequestFrom = {
   [K in WSRequestType["type"]]: Extract<WSRequestType, { type: K }>;
 };
+

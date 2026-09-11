@@ -18,6 +18,7 @@ export const ServerActionEnum = z.enum([
   "NTP_RESPONSE", // Reply to an NTP_REQUEST time sync probe
   "SEARCH_RESPONSE", // Music search results
   "LIVENESS_PING", // Liveness probe; client replies with LIVENESS_PONG
+  "WEBRTC_SIGNAL", // WebRTC P2P signaling relay from another client
 ]);
 
 // Client change
@@ -66,6 +67,14 @@ const LoadAudioSourceSchema = z.object({
 });
 export type LoadAudioSourceType = z.infer<typeof LoadAudioSourceSchema>;
 
+// Screen share update event
+const ScreenShareUpdateSchema = z.object({
+  type: z.literal("SCREEN_SHARE_UPDATE"),
+  sharingClientId: z.string().nullable(),
+  sharingUsername: z.string().nullable(),
+});
+export type ScreenShareUpdateType = z.infer<typeof ScreenShareUpdateSchema>;
+
 const RoomEventSchema = z.object({
   type: z.literal(ServerActionEnum.enum.ROOM_EVENT),
   event: z.discriminatedUnion("type", [
@@ -74,6 +83,7 @@ const RoomEventSchema = z.object({
     SetPlaybackControlsSchema,
     ChatUpdateSchema,
     LoadAudioSourceSchema,
+    ScreenShareUpdateSchema,
   ]),
 });
 

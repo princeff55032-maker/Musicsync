@@ -79,6 +79,21 @@ export const handleOpen = (ws: ServerWebSocket<WSData>, server: BunServer) => {
     },
   });
 
+  const activeSharer = room.getScreenSharer();
+  if (activeSharer) {
+    sendToClient({
+      ws,
+      message: {
+        type: "ROOM_EVENT",
+        event: {
+          type: "SCREEN_SHARE_UPDATE",
+          sharingClientId: activeSharer.clientId,
+          sharingUsername: activeSharer.username,
+        },
+      },
+    });
+  }
+
   sendUnicast({
     ws,
     message: {
@@ -228,7 +243,23 @@ export const handleClose = (ws: ServerWebSocket<WSData>, server: BunServer) => {
     const room = globalManager.getRoom(roomId);
 
     if (room) {
+      const wasSharer = room.getScreenSharer()?.clientId === clientId;
       room.removeClient(clientId);
+
+      if (wasSharer) {
+        sendBroadcast({
+          server,
+          roomId,
+          message: {
+            type: "ROOM_EVENT",
+            event: {
+              type: "SCREEN_SHARE_UPDATE",
+              sharingClientId: null,
+              sharingUsername: null,
+            },
+          },
+        });
+      }
 
       // Schedule cleanup for rooms with no active connections
       if (!room.hasActiveConnections()) {

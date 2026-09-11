@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils";
 import { motion } from "motion/react";
+import { ScreenShareStage } from "../room/ScreenShareStage";
 import { Queue } from "../Queue";
 import { InlineSearch } from "./InlineSearch";
 
@@ -12,7 +13,9 @@ export const Main = () => {
       )}
     >
       <motion.div className="p-6 pt-4">
-        {/* <h1 className="text-xl font-semibold mb-8">MusicSync</h1> */}
+        {/* Screen Share Cinema Stage */}
+        <ScreenShareStage className="mb-6" />
+
         <div className="mb-6">
           <InlineSearch />
         </div>

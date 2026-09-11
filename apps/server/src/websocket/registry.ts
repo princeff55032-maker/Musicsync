@@ -22,6 +22,9 @@ import { handleReorderAudioSources } from "@/websocket/handlers/handleReorderAud
 import { handleSetMetronome } from "@/websocket/handlers/setMetronome";
 import { handleSetLowPassFreq } from "@/websocket/handlers/setLowPassFreq";
 import { handleSync } from "@/websocket/handlers/sync";
+import { handleStartScreenShare } from "@/websocket/handlers/handleStartScreenShare";
+import { handleStopScreenShare } from "@/websocket/handlers/handleStopScreenShare";
+import { handleWebRTCSignal } from "@/websocket/handlers/handleWebRTCSignal";
 import type { WebsocketRegistry } from "@/websocket/types";
 
 export const WS_REGISTRY: WebsocketRegistry = {
@@ -132,5 +135,17 @@ export const WS_REGISTRY: WebsocketRegistry = {
   [ClientActionEnum.enum.LIVENESS_PONG]: {
     handle: handleLivenessPong,
     description: "Liveness reply to a server LIVENESS_PING",
+  },
+  [ClientActionEnum.enum.START_SCREEN_SHARE]: {
+    handle: handleStartScreenShare,
+    description: "Start screen sharing in room",
+  },
+  [ClientActionEnum.enum.STOP_SCREEN_SHARE]: {
+    handle: handleStopScreenShare,
+    description: "Stop screen sharing in room",
+  },
+  [ClientActionEnum.enum.WEBRTC_SIGNAL]: {
+    handle: handleWebRTCSignal,
+    description: "Relay WebRTC peer-to-peer signaling message",
   },
 };

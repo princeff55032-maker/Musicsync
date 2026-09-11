@@ -3,6 +3,7 @@ import { useGlobalStore } from "@/store/global";
 import { getProbeStats, handleNTPResponse } from "@/utils/ntp";
 import { sendWSRequest } from "@/utils/ws";
 import { ClientActionEnum, ServerActionEnum, type ExtractWSResponseFrom } from "@beatsync/shared";
+import { webrtcSignalBus } from "@/lib/webrtc";
 import type { WebsocketResponseRegistry } from "@/websocket/types";
 
 type RoomEvent = ExtractWSResponseFrom["ROOM_EVENT"]["event"];
@@ -25,6 +26,16 @@ const ROOM_EVENT_REGISTRY: {
   },
   LOAD_AUDIO_SOURCE: (event) => {
     useGlobalStore.getState().handleLoadAudioSource(event);
+  },
+  SCREEN_SHARE_UPDATE: (event) => {
+    if (event.sharingClientId && event.sharingUsername) {
+      useGlobalStore.getState().setScreenSharer({
+        clientId: event.sharingClientId,
+        username: event.sharingUsername,
+      });
+    } else {
+      useGlobalStore.getState().setScreenSharer(null);
+    }
   },
 };
 
@@ -171,5 +182,16 @@ export const WS_RESPONSE_REGISTRY: WebsocketResponseRegistry = {
       }
     },
     description: "Demo mode: clients with audio loaded",
+  },
+
+  [ServerActionEnum.enum.WEBRTC_SIGNAL]: {
+    handle: ({ response }) => {
+      webrtcSignalBus.emit({
+        fromClientId: response.fromClientId,
+        fromUsername: response.fromUsername,
+        signal: response.signal,
+      });
+    },
+    description: "WebRTC P2P signaling message from another client",
   },
 };
