@@ -7,20 +7,6 @@ import type { ExtractWSRequestFrom } from "@beatsync/shared";
 export const handleSearchMusic: HandlerFunction<ExtractWSRequestFrom["SEARCH_MUSIC"]> = async ({ ws, message }) => {
   if (IS_DEMO_MODE) return;
 
-  if (!process.env.PROVIDER_URL) {
-    sendUnicast({
-      ws,
-      message: {
-        type: "SEARCH_RESPONSE",
-        response: {
-          type: "error",
-          message: "Online music search requires a PROVIDER_URL microservice. Please upload audio files directly using the upload button.",
-        },
-      },
-    });
-    return;
-  }
-
   try {
     const data = await MUSIC_PROVIDER_MANAGER.search(message.query, message.offset ?? 0);
 
@@ -35,14 +21,14 @@ export const handleSearchMusic: HandlerFunction<ExtractWSRequestFrom["SEARCH_MUS
       },
     });
   } catch (error) {
-    console.error(error);
+    console.error("[handleSearchMusic] Search error:", error);
     sendUnicast({
       ws,
       message: {
         type: "SEARCH_RESPONSE",
         response: {
           type: "error",
-          message: "An error occurred while searching",
+          message: "An error occurred while searching for music. Please try a different query.",
         },
       },
     });

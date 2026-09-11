@@ -248,7 +248,7 @@ export function InlineSearch() {
           <input
             {...register("query")}
             type="text"
-            placeholder={canMutate ? "What do you want to play?" : "Search requires admin permissions"}
+            placeholder={canMutate ? "Search song or paste YouTube link..." : "Search requires admin permissions"}
             onFocus={handleFocus}
             onBlur={() => setIsFocused(false)}
             disabled={!canMutate}
