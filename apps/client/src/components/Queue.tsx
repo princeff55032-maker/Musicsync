@@ -2,7 +2,6 @@ import React from "react";
 import { cn } from "@/lib/utils";
 import { useCanMutate, useGlobalStore } from "@/store/global";
 import { AnimatePresence, motion } from "motion/react";
-import LoadDefaultTracksButton from "./LoadDefaultTracksButton";
 import {
   closestCenter,
   DndContext,
@@ -102,10 +101,7 @@ export const Queue = ({ className, ...rest }: React.ComponentProps<"div">) => {
             {isInitingSystem ? (
               "Loading tracks..."
             ) : canMutate ? (
-              <>
-                <div className="text-sm text-neutral-400">No tracks yet</div>
-                <LoadDefaultTracksButton />
-              </>
+              <div className="text-sm text-neutral-400">No tracks in queue</div>
             ) : (
               "No tracks available"
             )}
