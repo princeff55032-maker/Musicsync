@@ -5,9 +5,9 @@ export const VOLUME_UP_RAMP_TIME = 0.5;
 export const VOLUME_DOWN_RAMP_TIME = 0.5;
 
 // Scheduling settings
-export const MIN_SCHEDULE_TIME_MS = 400; // Minimum scheduling delay
+export const MIN_SCHEDULE_TIME_MS = 200; // Fast responsive scheduling
 export const DEFAULT_CLIENT_RTT_MS = 0; // Default RTT when no clients or initial value
-const CAP_SCHEDULE_TIME_MS = 3_000; // Maximum scheduling delay
+const CAP_SCHEDULE_TIME_MS = 1_500; // Maximum scheduling delay
 
 /**
  * Calculate dynamic scheduling delay based on maximum client RTT
@@ -15,10 +15,9 @@ const CAP_SCHEDULE_TIME_MS = 3_000; // Maximum scheduling delay
  * @returns Scheduling delay in milliseconds
  */
 export function calculateScheduleTimeMs(maxRTT: number): number {
-  // Use 1.5x the max RTT with a minimum of 400ms
-  // The 1.5x factor provides buffer for jitter and processing time
-  const dynamicDelay = Math.max(MIN_SCHEDULE_TIME_MS, maxRTT * 1.5 + 200);
+  // Use 1.2x max RTT + 80ms buffer for tight, low-latency sync
+  const dynamicDelay = Math.max(MIN_SCHEDULE_TIME_MS, maxRTT * 1.2 + 80);
 
-  // Cap at 3000ms to prevent excessive delays
+  // Cap at 1500ms to prevent excessive delays
   return Math.min(dynamicDelay, CAP_SCHEDULE_TIME_MS);
 }

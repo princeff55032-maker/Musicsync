@@ -188,7 +188,7 @@ export const Player = () => {
         <div className="flex items-center justify-center gap-6 mb-2">
           <button
             className={cn(
-              "text-gray-400 hover:text-white transition-colors cursor-pointer hover:scale-105 duration-200",
+              "text-gray-400 hover:text-white transition-all cursor-pointer hover:scale-105 active:scale-90 duration-150",
               isShuffled && "text-primary-400",
               !canMutate && "opacity-50 cursor-not-allowed"
             )}
@@ -204,7 +204,7 @@ export const Player = () => {
           </button>
           <button
             className={cn(
-              "text-gray-400 hover:text-white transition-colors cursor-pointer hover:scale-105 duration-200 disabled:opacity-50 disabled:cursor-not-allowed",
+              "text-gray-400 hover:text-white transition-all cursor-pointer hover:scale-105 active:scale-90 duration-150 disabled:opacity-50 disabled:cursor-not-allowed",
               !canMutate && "opacity-50 cursor-not-allowed"
             )}
             onClick={handleSkipBack}
@@ -214,7 +214,7 @@ export const Player = () => {
           </button>
           <button
             className={cn(
-              "bg-white text-black rounded-full p-3 md:p-2 hover:scale-105 transition-transform cursor-pointer duration-200 focus:outline-none",
+              "bg-white text-black rounded-full p-3 md:p-2 hover:scale-105 active:scale-95 transition-all cursor-pointer duration-150 focus:outline-none shadow-md hover:shadow-lg active:opacity-90",
               !canMutate && "opacity-50 cursor-not-allowed"
             )}
             onClick={handlePlay}
@@ -228,7 +228,7 @@ export const Player = () => {
           </button>
           <button
             className={cn(
-              "text-gray-400 hover:text-white transition-colors cursor-pointer hover:scale-105 duration-200 disabled:opacity-50 disabled:cursor-not-allowed",
+              "text-gray-400 hover:text-white transition-all cursor-pointer hover:scale-105 active:scale-90 duration-150 disabled:opacity-50 disabled:cursor-not-allowed",
               !canMutate && "opacity-50 cursor-not-allowed"
             )}
             onClick={handleSkipForward}
@@ -236,7 +236,7 @@ export const Player = () => {
           >
             <SkipForward className="w-7 h-7 md:w-5 md:h-5 fill-current" />
           </button>
-          <button className="text-gray-400 hover:text-white transition-colors cursor-default   hover:scale-105 duration-200">
+          <button className="text-gray-400 hover:text-white transition-all cursor-default hover:scale-105 active:scale-90 duration-150">
             <div className="relative">
               <Repeat className="w-4 h-4 relative text-primary-400" />
               <div className="absolute w-1 h-1 bg-green-500 rounded-full bottom-0 top-4.5 left-1/2 transform -translate-x-1/2 translate-y-1/2"></div>

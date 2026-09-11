@@ -324,22 +324,13 @@ export function SearchResults({ className, onTrackSelect }: SearchResultsProps) 
           {tracks.map((track, index) => (
             <motion.div
               key={track.id}
-              initial={{
-                opacity: 0,
-                filter: "blur(8px)",
-              }}
-              animate={{
-                opacity: 1,
-                filter: "blur(0px)",
-              }}
-              exit={{
-                opacity: 0,
-                filter: "blur(4px)",
-              }}
+              initial={{ opacity: 0, y: 3 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
               transition={{
-                duration: 0.3,
-                delay: index * 0.06,
-                ease: "easeInOut",
+                duration: 0.12,
+                delay: Math.min(index * 0.02, 0.2),
+                ease: "easeOut",
               }}
               className="group hover:bg-neutral-800 px-3 py-2 transition-all duration-200 cursor-pointer flex items-center gap-3 rounded-md select-none focus:outline-none focus:ring-1 focus:ring-primary-500"
               role="button"

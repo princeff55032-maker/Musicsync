@@ -1,23 +1,9 @@
-import { AUDIO_FILE_CACHE, IS_DEMO_MODE } from "@/demo";
-import { generateAudioFileName, uploadBytes, validateR2Config } from "@/lib/r2";
+import { IS_DEMO_MODE } from "@/demo";
 import { globalManager } from "@/managers";
 import { MUSIC_PROVIDER_MANAGER } from "@/managers/MusicProviderManager";
 import { sendBroadcast } from "@/utils/responses";
 import type { HandlerFunction } from "@/websocket/types";
 import type { ExtractWSRequestFrom } from "@beatsync/shared";
-
-function getServerOrigin(): string {
-  if (process.env.RENDER_EXTERNAL_URL) {
-    return process.env.RENDER_EXTERNAL_URL;
-  }
-  if (process.env.PUBLIC_SERVER_URL) {
-    return process.env.PUBLIC_SERVER_URL;
-  }
-  if (process.env.NODE_ENV === "production") {
-    return "https://musicsync-pz3t.onrender.com";
-  }
-  return `http://localhost:${process.env.PORT || 8080}`;
-}
 
 export const handleStreamMusic: HandlerFunction<ExtractWSRequestFrom["STREAM_MUSIC"]> = async ({
   ws,
@@ -62,54 +48,8 @@ export const handleStreamMusic: HandlerFunction<ExtractWSRequestFrom["STREAM_MUS
 
     const streamUrl = streamResponse.data.url;
 
-    // Use provided track name or fallback to track ID
-    const originalName = message.trackName ?? `track-${message.trackId}`;
-
-    // Download the audio file
-    console.log(`Downloading audio from: ${streamUrl}`);
-    const response = await fetch(streamUrl, {
-      headers: {
-        "User-Agent":
-          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-      },
-    });
-
-    // Generate a unique filename for the track
-    const fileName = generateAudioFileName(`${originalName}.mp3`);
-
-    if (!response.ok) {
-      throw new Error(`Failed to download audio: ${response.status}`);
-    }
-
-    // Get audio bytes
-    const arrayBuffer = await response.arrayBuffer();
-
-    // Get content type from response headers, fallback to audio/mp4 (AAC) or audio/mpeg
-    const contentType = response.headers.get("content-type") ?? "audio/mp4";
-
-    let finalAudioUrl: string;
-    const r2Config = validateR2Config();
-
-    if (r2Config.isValid) {
-      try {
-        console.log(`Uploading to R2: room-${roomId}/${fileName}`);
-        finalAudioUrl = await uploadBytes(arrayBuffer, roomId, fileName, contentType);
-      } catch (uploadError) {
-        console.warn("Failed to upload to R2, falling back to server memory cache:", uploadError);
-        AUDIO_FILE_CACHE.set(fileName, {
-          bytes: Buffer.from(arrayBuffer),
-          type: contentType,
-        });
-        finalAudioUrl = `${getServerOrigin()}/audio/${encodeURIComponent(fileName)}`;
-      }
-    } else {
-      console.log(`R2 not configured. Caching audio in server memory (${arrayBuffer.byteLength} bytes).`);
-      AUDIO_FILE_CACHE.set(fileName, {
-        bytes: Buffer.from(arrayBuffer),
-        type: contentType,
-      });
-      finalAudioUrl = `${getServerOrigin()}/audio/${encodeURIComponent(fileName)}`;
-    }
+    // Use direct high-speed CDN streaming (zero server memory overhead, instant start)
+    const finalAudioUrl = streamUrl;
 
     const isRoomIdle = room.getPlaybackState().type !== "playing";
 
